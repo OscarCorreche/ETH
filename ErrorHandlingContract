@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract ErrorHandlingContract {
+    uint public balance;
+    address public owner;
+
+    constructor(uint initialBalance) {
+        require(initialBalance > 0);
+        balance = initialBalance;
+        owner = msg.sender;
+    }
+
+    function deposit(uint amount) public {
+        require(amount > 0);
+        balance += amount;
+    }
+
+    function withdraw(uint amount) public {
+        require(msg.sender == owner);
+        require(amount <= balance);
+        balance -= amount;
+
+        (bool success, ) = owner.call{value: amount}("");
+        require(success);
+    }
+    function triggerRevert() public pure {
+        revert();
+    }
+
+    function checkInvariant() public view {
+        assert(balance >= 0);
+    }
+
+    receive() external payable {
+        balance += msg.value;
+    }
+}
