@@ -5,10 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract OscarToken is ERC20, Ownable {
-    mapping(address => bool) private _frozenAccounts;
-
-    event AccountFrozen(address indexed account);
-    event AccountUnfrozen(address indexed account);
 
     constructor(string memory name, string memory symbol) ERC20(name, symbol) Ownable(msg.sender) {}
 
@@ -20,20 +16,11 @@ contract OscarToken is ERC20, Ownable {
         _burn(msg.sender, amount);
     }
 
-    function isAccountFrozen(address account) public view returns (bool) {
-        return _frozenAccounts[account];
-    }
-
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal {
       
         _beforeTokenTransferCustom(from, to, amount);
 
-        if (from != address(0) && to != address(0)) {
-            require(!_frozenAccounts[from], "ERC20: sender account is frozen");
-            require(!_frozenAccounts[to], "ERC20: recipient account is frozen");
-        }
     }
-
     function _beforeTokenTransferCustom(address from, address to, uint256 amount) private {
        
     }
