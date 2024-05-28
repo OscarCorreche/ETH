@@ -12,7 +12,7 @@ contract OscarToken is ERC20 {
     }
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "Only boss can control this function");
+        require(msg.sender == owner, "Only Oscar can control this function");
         _;
     }
 
