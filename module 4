@@ -14,6 +14,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract OscarBoosterShop is ERC20, Ownable {
 
     mapping(uint256 => uint256) public shopPrices;
+    mapping(address => mapping(uint256 => uint256)) private _playerInventory;
 
     constructor() ERC20("OSCAR", "OTKNS") Ownable(msg.sender) {
         shopPrices[1] = 100;  
@@ -27,7 +28,7 @@ contract OscarBoosterShop is ERC20, Ownable {
     }
 
     function sendTokens(address to, uint256 amount) public {
-        require(balanceOf(msg.sender) >= amount, "Transfer Failed: Tou don't have enough balance.");
+        require(balanceOf(msg.sender) >= amount, "Transfer Failed: You don't have enough balance.");
         transfer(to, amount);
     }
 
@@ -39,6 +40,7 @@ contract OscarBoosterShop is ERC20, Ownable {
         require(shopPrices[item] > 0, "Item is not available.");
         require(balanceOf(msg.sender) >= shopPrices[item], "Redeem Failed: Insufficient balance.");
         _transfer(msg.sender, owner(), shopPrices[item]);
+        _playerInventory[msg.sender][item] += 1;
     }
 
     function burnTokens(uint256 amount) public {
@@ -49,8 +51,38 @@ contract OscarBoosterShop is ERC20, Ownable {
     function checkBalance() external view returns (uint256) {
         return balanceOf(msg.sender);
     }   
-    
+
+    function checkInventory() external view returns (string memory) {
+        return string(
+            abi.encodePacked(
+                "Inventory: Small Booster (", uintToString(_playerInventory[msg.sender][1]), 
+                ") Medium Booster (", uintToString(_playerInventory[msg.sender][2]), 
+                ") Large Booster (", uintToString(_playerInventory[msg.sender][3]), 
+                ") Extra Large Booster (", uintToString(_playerInventory[msg.sender][4]), ")"
+            )
+        );
+    }
+
     function decimals() public pure override returns (uint8) {
         return 0;
+    }
+
+    function uintToString(uint256 v) internal pure returns (string memory) {
+        if (v == 0) {
+            return "0";
+        }
+        uint256 maxLength = 78;
+        bytes memory reversed = new bytes(maxLength);
+        uint256 i = 0;
+        while (v != 0) {
+            uint256 remainder = v % 10;
+            v = v / 10;
+            reversed[i++] = bytes1(uint8(48 + remainder));
+        }
+        bytes memory s = new bytes(i); 
+        for (uint256 j = 0; j < i; j++) {
+            s[j] = reversed[i - j - 1];
+        }
+        return string(s);
     }
 }
